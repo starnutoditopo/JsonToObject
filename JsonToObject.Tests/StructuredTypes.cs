@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 
 namespace JsonToObject.Tests
 {
@@ -8,7 +9,7 @@ namespace JsonToObject.Tests
     public class StructuredTypes
     {
         [Fact]
-        public void TestObject()
+        public void TestSimpleObject()
         {
             string simpleJsonObject = @"{""null"": null, ""boolean"": true, ""number"":1, ""string"": ""a"", ""array"": [], ""object"": {}}";
             object? o = JsonToObjectConverter.ConvertToObject(simpleJsonObject);
@@ -26,6 +27,30 @@ namespace JsonToObject.Tests
             Assert.Contains("string", propertyNames);
             Assert.Contains("array", propertyNames);
             Assert.Contains("object", propertyNames);
+        }
+
+        [Fact]
+        public void TestNestedObjects()
+        {
+            string simpleJsonObject = @"{""firstLevel"": {""secondLevel"": {""thirdLevel"": 1}}}";
+            object? o = JsonToObjectConverter.ConvertToObject(simpleJsonObject);
+            Assert.NotNull(o);
+            Assert.Contains("firstLevel", o!.GetType().GetProperties().Select(p => p.Name));
+
+            PropertyInfo property1 = o!.GetType().GetProperty("firstLevel")!;
+            object? nested1 = property1.GetValue(o!);
+            Assert.NotNull(nested1);
+            Assert.Contains("secondLevel", nested1!.GetType().GetProperties().Select(p => p.Name));
+
+            PropertyInfo property2 = nested1!.GetType().GetProperty("secondLevel")!;
+            object? nested2 = property2.GetValue(nested1!);
+            Assert.NotNull(nested2);
+            Assert.Contains("thirdLevel", nested2!.GetType().GetProperties().Select(p => p.Name));
+
+            PropertyInfo property3 = nested2!.GetType().GetProperty("thirdLevel")!;
+            object? nested3 = property3.GetValue(nested2!);
+            Assert.NotNull(nested3);
+            Assert.IsType<double>(nested3);
         }
     }
 }
