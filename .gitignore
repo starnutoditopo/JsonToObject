@@ -1,0 +1,5 @@
+JsonToObject/obj
+.vs/
+JsonToObject.Tests/bin/
+JsonToObject.Tests/obj/
+JsonToObject/bin/
