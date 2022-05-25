@@ -38,7 +38,7 @@ namespace JsonToObject.Tests
         [Fact]
         public void TestNestedObjects()
         {
-            string simpleJsonObject = @"
+            string structuredJsonObject = @"
                 {
                     ""firstLevel"": {
                         ""secondLevel"": {
@@ -47,7 +47,7 @@ namespace JsonToObject.Tests
                     }
                 }
                 ";
-            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(simpleJsonObject);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(structuredJsonObject);
             Assert.NotNull(o);
             Assert.Contains("firstLevel", o!.GetType().GetProperties().Select(p => p.Name));
 
