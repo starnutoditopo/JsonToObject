@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Reflection;
 
 namespace JsonToObject.Tests
@@ -6,15 +5,22 @@ namespace JsonToObject.Tests
     /// <summary>
     /// Perform tests about json structured types.
     /// </summary>
+    [Collection(Constants.CollectionDefinitions.JsonToObject)]
     public class StructuredTypes
     {
+        private readonly JsonToObjectFixture jsonToObjectFixture;
+        public StructuredTypes(JsonToObjectFixture jsonToObjectFixture)
+        {
+            this.jsonToObjectFixture = jsonToObjectFixture;
+        }
+
         [Fact]
         public void TestSimpleObject()
         {
             string simpleJsonObject = @"{""null"": null, ""boolean"": true, ""number"":1, ""string"": ""a"", ""array"": [], ""object"": {}}";
-            object? o = JsonToObjectConverter.ConvertToObject(simpleJsonObject);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(simpleJsonObject);
             Assert.NotNull(o);
-            
+
             var propertyNames = o!
                 .GetType()
                 .GetProperties()
@@ -32,8 +38,16 @@ namespace JsonToObject.Tests
         [Fact]
         public void TestNestedObjects()
         {
-            string simpleJsonObject = @"{""firstLevel"": {""secondLevel"": {""thirdLevel"": 1}}}";
-            object? o = JsonToObjectConverter.ConvertToObject(simpleJsonObject);
+            string simpleJsonObject = @"
+                {
+                    ""firstLevel"": {
+                        ""secondLevel"": {
+                            ""thirdLevel"": 1
+                        }
+                    }
+                }
+                ";
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(simpleJsonObject);
             Assert.NotNull(o);
             Assert.Contains("firstLevel", o!.GetType().GetProperties().Select(p => p.Name));
 

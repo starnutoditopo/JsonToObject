@@ -2,16 +2,24 @@ using System.Collections;
 
 namespace JsonToObject.Tests
 {
+
     /// <summary>
     /// Perform tests about json basic types.
     /// </summary>
+    [Collection(Constants.CollectionDefinitions.JsonToObject)]
     public class BasicTypes
     {
+        private readonly JsonToObjectFixture jsonToObjectFixture;
+        public BasicTypes(JsonToObjectFixture jsonToObjectFixture)
+        {
+            this.jsonToObjectFixture = jsonToObjectFixture;
+        }
+
         [Fact]
         public void TestNull()
         {
             string nullJson = @"null";
-            object? o = JsonToObjectConverter.ConvertToObject(nullJson);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(nullJson);
             Assert.Null(o);
         }
 
@@ -19,7 +27,7 @@ namespace JsonToObject.Tests
         public void TestNotNull()
         {
             string simpleJsonObject = @"{}";
-            object? o = JsonToObjectConverter.ConvertToObject(simpleJsonObject);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(simpleJsonObject);
             Assert.NotNull(o);
         }
 
@@ -27,7 +35,7 @@ namespace JsonToObject.Tests
         public void TestNumeric()
         {
             string jsonNumber = @"1234";
-            object? o = JsonToObjectConverter.ConvertToObject(jsonNumber);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(jsonNumber);
             Assert.NotNull(o);
             Assert.Equal(1234.0, (double)o!);
         }
@@ -36,7 +44,7 @@ namespace JsonToObject.Tests
         public void TestBooleanTrue()
         {
             string jsonBooleanTrue = @"true";
-            object? o = JsonToObjectConverter.ConvertToObject(jsonBooleanTrue);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(jsonBooleanTrue);
             Assert.NotNull(o);
             Assert.True((bool)o!);
         }
@@ -45,7 +53,7 @@ namespace JsonToObject.Tests
         public void TestBooleanFalse()
         {
             string jsonBooleanFalse = @"false";
-            object? o = JsonToObjectConverter.ConvertToObject(jsonBooleanFalse);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(jsonBooleanFalse);
             Assert.NotNull(o);
             Assert.False((bool)o!);
         }
@@ -54,7 +62,7 @@ namespace JsonToObject.Tests
         public void TestEmptyString()
         {
             string emptyJsonString = @"""""";
-            object? o = JsonToObjectConverter.ConvertToObject(emptyJsonString);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(emptyJsonString);
             Assert.NotNull(o);
             Assert.Equal(string.Empty, o!);
         }
@@ -63,7 +71,7 @@ namespace JsonToObject.Tests
         public void TestString()
         {
             string jsonString = @"""abc""";
-            object? o = JsonToObjectConverter.ConvertToObject(jsonString);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(jsonString);
             Assert.NotNull(o);
             Assert.Equal("abc", o!);
         }
@@ -72,7 +80,7 @@ namespace JsonToObject.Tests
         public void TestEmptyArray()
         {
             string emptyJsonArray = @"[]";
-            object? o = JsonToObjectConverter.ConvertToObject(emptyJsonArray);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(emptyJsonArray);
             Assert.NotNull(o);
             Assert.IsAssignableFrom<IEnumerable>(o!);
             Assert.False(((IEnumerable<object>)o!).Any());
@@ -82,7 +90,7 @@ namespace JsonToObject.Tests
         public void TestNonEmptyArray()
         {
             string jsonArray = @"[1, ""a"", [], {}]";
-            object? o = JsonToObjectConverter.ConvertToObject(jsonArray);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(jsonArray);
             Assert.NotNull(o);
             Assert.IsAssignableFrom<IEnumerable>(o!);
             Assert.True(((IEnumerable<object>)o!).Any());
@@ -93,7 +101,7 @@ namespace JsonToObject.Tests
         public void TestObject()
         {
             string simpleJsonObject = @"{}";
-            object? o = JsonToObjectConverter.ConvertToObject(simpleJsonObject);
+            object? o = jsonToObjectFixture.JsonToObjectConverter.ConvertToObject(simpleJsonObject);
             Assert.NotNull(o);
             Assert.IsNotType<string>(o!);
             Assert.IsNotType<bool>(o!);

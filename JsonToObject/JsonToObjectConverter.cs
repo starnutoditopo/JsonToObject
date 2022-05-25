@@ -5,6 +5,7 @@ using System.Text.Json;
 
 namespace JsonToObject;
 
+/// <summary>Provides functionalities to convert JSON strings in to CLR objects.</summary>
 public class JsonToObjectConverter
 {
     private class Counter
@@ -22,14 +23,40 @@ public class JsonToObjectConverter
         }
     }
 
+
     private static ulong assemblyGenerationCounter;
+    private readonly JsonToObjectConverterOptions options;
 
     static JsonToObjectConverter()
     {
         assemblyGenerationCounter = 0;
     }
 
-    public static object? ConvertToObject(string jsonString)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JsonToObjectConverter" /> class, using default options.
+    /// </summary>
+    /// <param name="options">The options.</param>
+    public JsonToObjectConverter()
+        : this(new JsonToObjectConverterOptions())
+    {
+    }
+
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JsonToObjectConverter" /> class, using the specified options.
+    /// </summary>
+    /// <param name="options">The options.</param>
+    public JsonToObjectConverter(JsonToObjectConverterOptions options)
+    {
+        this.options = options;
+    }
+
+    /// <summary>Converts a JSON string to an instance of a CLR object.</summary>
+    /// <param name="jsonString">The json string.</param>
+    /// <returns>
+    ///   <br />
+    /// </returns>
+    public object? ConvertToObject(string jsonString)
     {
         JsonSerializerOptions opt = new JsonSerializerOptions()
         {
@@ -39,17 +66,25 @@ public class JsonToObjectConverter
         object? result = ToStronglyTypedObject(rawResult);
         return result;
     }
-    private static object? ToStronglyTypedObject(JsonElement? nullableJsonElement)
+
+    private object? ToStronglyTypedObject(JsonElement? nullableJsonElement)
     {
+        string assemblyNameString;
         ulong assemblyId = Interlocked.Increment(ref assemblyGenerationCounter);
-        string assemblyNameString = $"RuntimeGeneratedAssembly_{assemblyId.ToString(CultureInfo.InvariantCulture)}";
-        string moduleName = $"RuntimeGeneratedModule";
-        ModuleBuilder moduleBuilder = CreateModuleBuilder(assemblyNameString, moduleName);
+        try
+        {
+            assemblyNameString = string.Format(this.options.RuntimeGeneratedAssemblyNameTemplate, assemblyId.ToString(CultureInfo.InvariantCulture));
+        }
+        catch
+        {
+            throw new InvalidOperationException($@"Unable to generate assembly name using template '{this.options.RuntimeGeneratedAssemblyNameTemplate}' and id '{assemblyId}'. Please, review the {nameof(JsonToObjectConverterOptions.RuntimeGeneratedAssemblyNameTemplate)} property in the options.");
+        }
+        ModuleBuilder moduleBuilder = CreateModuleBuilder(assemblyNameString, this.options.RuntimeGeneratedModuleName);
         Counter typeGenerationCounter = new Counter();
         var result = ToStronglyTypedObject(nullableJsonElement, moduleBuilder, typeGenerationCounter);
         return result;
     }
-    private static object? ToStronglyTypedObject(
+    private object? ToStronglyTypedObject(
         JsonElement? nullableJsonElement,
         ModuleBuilder moduleBuilder,
         Counter typeGenerationCounter
@@ -85,7 +120,16 @@ public class JsonToObjectConverter
             case JsonValueKind.Object:
                 {
                     ulong typeId = typeGenerationCounter.Next();
-                    string typeName = $"RuntimeGeneratedType_{typeId.ToString(CultureInfo.InvariantCulture)}";
+                    string typeName;
+                    try
+                    {
+                        typeName = string.Format(this.options.RuntimeGeneratedTypeNameTemplate, typeId.ToString(CultureInfo.InvariantCulture));
+                    }
+                    catch
+                    {
+                        throw new InvalidOperationException($@"Unable to generate type name using template '{this.options.RuntimeGeneratedTypeNameTemplate}' and id '{typeId}'. Please, review the {nameof(JsonToObjectConverterOptions.RuntimeGeneratedTypeNameTemplate)} property in the options.");
+                    }
+
                     TypeBuilder typeBuilder = CreateTypeBuilder(moduleBuilder, typeName);
                     Dictionary<string, object?> propertyValues = new Dictionary<string, object?>();
                     foreach (var property in jsonElement.EnumerateObject())
