@@ -15,7 +15,7 @@ namespace JsonToObject.Tests
         }
 
         [Fact]
-        public void TestDefaultUsage()
+        public void DefaultUsageExample()
         {
             string jsonObject = @"
                 {
@@ -58,6 +58,42 @@ namespace JsonToObject.Tests
                 .GetValue(o!);
 
             Assert.NotNull(propertyValue);
+        }
+
+        [Fact]
+        public void CustomizedAssemblyModuleAndTypeNames()
+        {
+            string jsonObject = @"
+                {
+                    ""property"": {
+                        ""subProperty"": {
+                            ""numericValue"": 1,
+                            ""stringValue"": ""Hi, there!""
+                        }
+                    },
+                    ""tags"": [
+                        ""Tag 1"",
+                        ""Tag 2"",
+                        true
+                    ]
+                }
+                ";
+
+            JsonToObjectConverterOptions options = new JsonToObjectConverterOptions()
+            {
+                RuntimeGeneratedAssemblyNameTemplate = "MyAssembly_{0}",
+                RuntimeGeneratedTypeNameTemplate = "MyType_{0}",
+                RuntimeGeneratedModuleName = "MyModule"
+            };
+            JsonToObjectConverter jsonToObjectConverter = new JsonToObjectConverter(options);
+            object? o = jsonToObjectConverter.ConvertToObject(jsonObject);
+            Assert.NotNull(o);
+
+            Type type = o!.GetType();
+            Assert.StartsWith("MyType", type.Name);
+            Assert.StartsWith("MyAssembly", type.Assembly.FullName);
+
+            this.logger.WriteLine(o!.GetType().AssemblyQualifiedName);
         }
     }
 }
