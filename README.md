@@ -10,4 +10,4 @@ Here's an example, excerpted from one of the unit tests, showing how the resulti
 
 ![Screen shot](ScreenShot.png)
 
-A simple example can be found in [JsonToObject.Tests/UsageExamples.cs](JsonToObject.Tests/UsageExamples.cs).
+Usage examples can be found in [JsonToObject.Tests/UsageExamples.cs](JsonToObject.Tests/UsageExamples.cs).
