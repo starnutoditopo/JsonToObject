@@ -95,5 +95,39 @@ namespace JsonToObject.Tests
 
             this.logger.WriteLine(o!.GetType().AssemblyQualifiedName);
         }
+
+        [Fact]
+        public void CustomizedDebuggerDisplayName()
+        {
+            string jsonObject = @"
+                {
+                    ""property"": {
+                        ""subProperty"": {
+                            ""numericValue"": 1,
+                            ""stringValue"": ""Hi, there!""
+                        }
+                    },
+                    ""tags"": [
+                        ""Tag 1"",
+                        ""Tag 2"",
+                        true
+                    ]
+                }
+                ";
+
+            JsonToObjectConverterOptions options = new JsonToObjectConverterOptions()
+            {
+                GetDebuggerDisplayString = (typeName, properties) =>
+                {
+                    return $"{typeName} ({properties.Count} properties)";
+                }
+            };
+
+            JsonToObjectConverter jsonToObjectConverter = new JsonToObjectConverter(options);
+            object? o = jsonToObjectConverter.ConvertToObject(jsonObject);
+
+            // put a breakpoint here and notice the value displayed by the debugger for variable o:
+            Assert.NotNull(o);
+        }
     }
 }

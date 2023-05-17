@@ -22,4 +22,6 @@ public class JsonToObjectConverterOptions
     /// <value>The template to use to generate the name of runtime-generated types.</value>
     /// <remarks>Should contain a "{0}" placeholder.</remarks>
     public string RuntimeGeneratedTypeNameTemplate { get; set; } = CONSTANTS_RuntimeGeneratedTypeNameTemplate;
+
+    public Func<string, IDictionary<string, object?>, string?>? GetDebuggerDisplayString { get; set; }
 }

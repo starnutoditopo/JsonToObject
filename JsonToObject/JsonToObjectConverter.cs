@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text.Json;
@@ -35,7 +36,6 @@ public class JsonToObjectConverter
     /// <summary>
     /// Initializes a new instance of the <see cref="JsonToObjectConverter" /> class, using default options.
     /// </summary>
-    /// <param name="options">The options.</param>
     public JsonToObjectConverter()
         : this(new JsonToObjectConverterOptions())
     {
@@ -131,6 +131,7 @@ public class JsonToObjectConverter
                     }
 
                     TypeBuilder typeBuilder = CreateTypeBuilder(moduleBuilder, typeName);
+
                     Dictionary<string, object?> propertyValues = new Dictionary<string, object?>();
                     foreach (var property in jsonElement.EnumerateObject())
                     {
@@ -147,6 +148,18 @@ public class JsonToObjectConverter
                         }
                         CreateAutoImplementedProperty(typeBuilder, propertyName, propertyValueType);
                         propertyValues.Add(propertyName, propertyValue);
+                    }
+
+                    if (this.options.GetDebuggerDisplayString != null)
+                    {
+                        // Mark the resultType with DebuggerDisplayAttribute
+
+                        Type[] ctorParams = new Type[] { typeof(string) };
+                        ConstructorInfo constructorInfo = typeof(DebuggerDisplayAttribute).GetConstructor(ctorParams)!;
+                        string? debuggerDisplayString;
+                        debuggerDisplayString = this.options.GetDebuggerDisplayString(typeName, propertyValues);
+                        CustomAttributeBuilder customAttributeBuilder = new CustomAttributeBuilder(constructorInfo, new string?[] { debuggerDisplayString });
+                        typeBuilder.SetCustomAttribute(customAttributeBuilder);
                     }
 
                     Type resultType = typeBuilder.CreateType()!;
